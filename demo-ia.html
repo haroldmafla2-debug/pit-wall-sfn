@@ -7,7 +7,7 @@
     --lima:#c8ff00;--verde:#00e676;--blanco:#f4f6f8;--gris:#8a94a3;--linea:#2a313d;--mono:'Courier New',monospace}
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--carbon);color:var(--blanco);font-family:'Segoe UI',system-ui,sans-serif;
-    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px 20px 110px;
     background-image:repeating-linear-gradient(90deg,transparent,transparent 58px,rgba(255,255,255,.012) 58px,rgba(255,255,255,.012) 60px)}
   .stage{max-width:1100px;width:100%}
   .slide{display:none;animation:fade .4s}
@@ -44,13 +44,12 @@
   .nav button:hover{border-color:var(--rojo);background:var(--rojo)}
   .nav .count{font-family:var(--mono);color:var(--gris);font-size:15px;min-width:56px;text-align:center}
   .kicker{font-family:var(--mono);font-size:14px;color:var(--gris);letter-spacing:2px;margin-top:26px}
-  .home{position:fixed;top:16px;left:16px;font-family:var(--mono);font-size:12px;letter-spacing:1px;
-    color:var(--gris);text-decoration:none;background:var(--asfalto);border:1px solid var(--linea);
-    padding:8px 14px;border-radius:6px;transition:.15s;z-index:10}
-  .home:hover{border-color:var(--rojo);color:var(--blanco)}
+  .nav .home{font-family:var(--mono);font-size:13px;letter-spacing:1px;color:var(--gris);
+    text-decoration:none;background:var(--asfalto);border:1px solid var(--linea);
+    padding:12px 18px;border-radius:8px;transition:.15s;display:inline-block}
+  .nav .home:hover{border-color:var(--rojo);color:var(--blanco)}
 </style></head>
 <body>
-<a class="home" href="./">◂ PIT WALL</a>
 <div class="stage">
 
   <!-- 1 -->
@@ -114,6 +113,7 @@
 </div>
 
 <div class="nav">
+  <a class="home" href="./">◂ PIT WALL</a>
   <button onclick="mv(-1)">◂ Atrás</button>
   <span class="count" id="count">1 / 4</span>
   <button onclick="mv(1)">Siguiente ▸</button>
