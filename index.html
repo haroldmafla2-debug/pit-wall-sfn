@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pit Wall SFN · Mecatrónica</title>
+<style>
+  :root{
+    --carbon:#0a0d12; --carbon2:#12171f; --asfalto:#1b2029;
+    --rojo:#e10600; --rojo2:#ff2b1f; --lima:#c8ff00; --blanco:#f4f6f8;
+    --gris:#8a94a3; --linea:#2a313d;
+    --mono:'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--carbon); color:var(--blanco);
+    font-family:'Segoe UI',system-ui,sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background-image:repeating-linear-gradient(90deg,transparent,transparent 38px,rgba(255,255,255,.015) 38px,rgba(255,255,255,.015) 40px);
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 18px}
+
+  /* HERO */
+  header{
+    padding:38px 0 28px;border-bottom:2px solid var(--rojo);
+    background:linear-gradient(180deg,var(--carbon2),var(--carbon));
+    position:relative;overflow:hidden;
+  }
+  .flag{position:absolute;top:0;right:0;width:120px;height:100%;opacity:.08;
+    background:repeating-conic-gradient(#fff 0% 25%,#000 0% 50%) 0/26px 26px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--rojo2);text-transform:uppercase;font-weight:bold}
+  h1{font-size:34px;font-weight:800;line-height:1.05;margin:8px 0 6px;letter-spacing:-.5px}
+  h1 span{color:var(--rojo2)}
+  .sub{color:var(--gris);font-size:15px;max-width:90%}
+  .telemetry{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:11px;background:var(--asfalto);border:1px solid var(--linea);
+    padding:6px 10px;border-radius:3px;color:var(--lima)}
+
+  /* SELECTOR */
+  .picker{padding:26px 0 8px}
+  .picker h2{font-size:13px;letter-spacing:2px;color:var(--gris);text-transform:uppercase;font-family:var(--mono);margin-bottom:14px}
+  .grades{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .gbtn{
+    background:var(--asfalto);border:1px solid var(--linea);border-radius:6px;
+    padding:16px 8px;text-align:center;cursor:pointer;transition:.15s;color:var(--blanco);
+    font-weight:700;font-size:20px;position:relative;
+  }
+  .gbtn small{display:block;font-size:10px;color:var(--gris);font-weight:400;margin-top:4px;letter-spacing:.5px}
+  .gbtn:hover{border-color:var(--rojo)}
+  .gbtn.active{background:var(--rojo);border-color:var(--rojo2);box-shadow:0 0 0 1px var(--rojo2)}
+  .gbtn.active small{color:#ffd}
+
+  /* PANEL */
+  .panel{display:none;padding:8px 0 30px;animation:fade .3s}
+  .panel.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{background:var(--carbon2);border:1px solid var(--linea);border-radius:8px;padding:20px;margin-top:16px}
+  .card .num{font-family:var(--mono);color:var(--rojo2);font-weight:bold;font-size:13px;letter-spacing:1px}
+  .card h3{font-size:19px;margin:4px 0 10px}
+  .card p{color:#c9d1db;font-size:14.5px;margin-bottom:8px}
+  .apsh{display:inline-block;font-family:var(--mono);font-size:10px;background:var(--asfalto);
+    color:var(--lima);padding:3px 7px;border-radius:3px;margin-right:5px;letter-spacing:1px;border:1px solid var(--linea)}
+  code{font-family:var(--mono);background:#000;color:var(--lima);padding:2px 6px;border-radius:3px;font-size:13px}
+  pre{background:#000;border:1px solid var(--linea);border-left:3px solid var(--rojo);border-radius:5px;
+    padding:14px;overflow-x:auto;margin:10px 0;font-family:var(--mono);font-size:13px;color:#e8e8e8;line-height:1.6}
+  .taskgoal{background:var(--asfalto);border-radius:6px;padding:12px 14px;margin-top:10px;font-size:13.5px;border-left:3px solid var(--lima)}
+  .taskgoal b{color:var(--lima)}
+  .iatip{background:linear-gradient(135deg,#0e1620,#12171f);border:1px solid #1a4d6b;border-radius:8px;padding:16px 18px;margin-top:14px}
+  .iatip .tt{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:#4fc3f7;font-weight:bold;margin-bottom:8px}
+  .iatip .th{font-size:15px;font-weight:700;margin-bottom:6px;color:#fff}
+  .iatip p{font-size:13.5px;color:#c9d1db;margin-bottom:8px}
+  .iatip .mini{background:#000;border-radius:5px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:#4fc3f7;line-height:1.5;border:1px dashed #1a4d6b}
+  .curio{background:var(--asfalto);border-radius:8px;padding:14px 16px;margin-top:12px;border-left:3px solid var(--rojo2)}
+  .curio .ct{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--rojo2);font-weight:bold;margin-bottom:6px}
+  .curio p{font-size:13.5px;color:#d4dae2;line-height:1.45}
+  .curio b{color:var(--lima)}
+
+  /* IA COPILOT */
+  .copilot{background:linear-gradient(135deg,#1a0e0e,#12171f);border:1px solid var(--rojo);
+    border-radius:10px;padding:22px;margin:24px 0}
+  .copilot .tag{font-family:var(--mono);font-size:11px;color:var(--rojo2);letter-spacing:2px;font-weight:bold}
+  .copilot h3{font-size:20px;margin:6px 0 12px}
+  .copilot p{font-size:14px;color:#d4dae2;margin-bottom:12px}
+  .prompt{background:#000;border-radius:6px;padding:14px;font-family:var(--mono);font-size:12.5px;
+    color:var(--lima);position:relative;line-height:1.6;border:1px dashed var(--linea)}
+  .copybtn{margin-top:10px;background:var(--rojo);color:#fff;border:none;padding:11px 16px;border-radius:6px;
+    font-weight:700;font-size:14px;cursor:pointer;width:100%;transition:.15s}
+  .copybtn:hover{background:var(--rojo2)}
+  .copybtn.done{background:var(--lima);color:#000}
+  .rules{margin-top:16px;display:grid;gap:8px}
+  .rule{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#c9d1db}
+  .rule b{color:var(--blanco)}
+  .rule .dot{color:var(--rojo2);font-weight:bold;flex-shrink:0}
+  .demolink{display:block;margin-top:16px;text-align:center;text-decoration:none;
+    background:var(--asfalto);border:1px solid var(--linea);border-radius:6px;padding:13px 16px;
+    color:var(--blanco);font-weight:700;font-size:14px;transition:.15s}
+  .demolink:hover{border-color:var(--lima);background:#000}
+  .demolink small{display:block;font-family:var(--mono);font-size:10px;color:var(--gris);
+    font-weight:400;letter-spacing:1px;margin-top:4px}
+
+  /* DATOS CARRITOS */
+  .garage{margin:28px 0}
+  .garage h2{font-size:13px;letter-spacing:2px;color:var(--gris);text-transform:uppercase;font-family:var(--mono);margin-bottom:14px}
+  .cars{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .car{background:var(--carbon2);border:1px solid var(--linea);border-radius:8px;padding:14px;text-align:center}
+  .car .t{font-family:var(--mono);font-size:26px;font-weight:bold;color:var(--lima)}
+  .car .n{font-size:12px;color:var(--gris);margin-top:2px}
+  .car.best{border-color:var(--lima)}
+  .car.best .flag2{font-size:10px;color:var(--lima);font-family:var(--mono);letter-spacing:1px}
+
+  footer{border-top:1px solid var(--linea);padding:24px 0 40px;color:var(--gris);font-size:12px;text-align:center}
+  footer .lema{font-style:italic;color:#aeb6c2;margin-bottom:8px;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div class="flag"></div>
+  <div class="wrap">
+    <div class="eyebrow">■ Gran Premio SFN · Vuelta 1</div>
+    <h1>PIT <span>WALL</span><br>Mecatrónica</h1>
+    <p class="sub">Bienvenidos al muro de boxes. Aquí analizamos los datos reales de nuestros carritos con Python — como los ingenieros de la F1. Tu celular es tu estación de telemetría.</p>
+    <div class="telemetry">
+      <span class="chip">🏎 4 carritos balineras</span>
+      <span class="chip">⚙ 1 chasis gokart</span>
+      <span class="chip">🐍 Python · 1er año</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="picker">
+    <h2>▸ Elige tu escudería</h2>
+    <div class="grades">
+      <div class="gbtn" data-g="9" onclick="pick('9')">9°<small>ARRANCA SUAVE</small></div>
+      <div class="gbtn" data-g="10" onclick="pick('10')">10°<small>LISTAS GP</small></div>
+      <div class="gbtn" data-g="11" onclick="pick('11')">11°<small>REPORTE OFICIAL</small></div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="panel" id="p9">
+    <div class="card">
+      <div class="num">MISIÓN 9°</div>
+      <h3>Mis primeros datos en Python</h3>
+      <p>Es tu primer año programando. Vamos paso a paso: aprende a guardar los tiempos de los carritos y a leerlos.</p>
+      <div><span class="apsh">A ANALIZAR</span><span class="apsh">P PENSAR</span><span class="apsh">S SIMULAR</span><span class="apsh">H HACER</span></div>
+      <pre>tiempos = [8, 7, 9]
+
+print(tiempos[0])   # el primero
+print(len(tiempos)) # cuántos hay</pre>
+      <p>Recuerda: <b>se cuenta desde 0</b>. El primer carrito es <code>tiempos[0]</code>.</p>
+      <div class="taskgoal"><b>Tu meta hoy:</b> guardar 3 tiempos en una lista e imprimir el primero. Si te trabas, tu copiloto IA te explica CÓMO (no lo hace por ti).</div>
+      <div class="iatip">
+        <div class="tt">🧠 TIP IA · CLASE 1</div>
+        <div class="th">Pídele a la IA que te ponga un ejemplo</div>
+        <p>Cuando algo no entiendas, no pidas la respuesta. Pide un ejemplo distinto. Prueba este prompt:</p>
+        <div class="mini">"No entiendo qué es una lista en Python. Dame un ejemplo con frutas, no con números, para entenderlo."</div>
+      </div>
+      <div class="curio">
+        <div class="ct">🔥 DATO CURIOSO</div>
+        <p>Python se llama así <b>no por la serpiente</b>, sino por el grupo de comedia británico "Monty Python". El creador quería un nombre corto y divertido. Hoy es el lenguaje #1 del mundo para Inteligencia Artificial.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="panel" id="p10">
+    <div class="card">
+      <div class="num">MISIÓN 10°</div>
+      <h3>Las listas del Gran Premio</h3>
+      <p>Guardamos los tiempos reales de los 4 carritos en una lista y encontramos al ganador con Python.</p>
+      <div><span class="apsh">A ANALIZAR</span><span class="apsh">P PENSAR</span><span class="apsh">S SIMULAR</span><span class="apsh">H HACER</span></div>
+      <pre>tiempos = [8.4, 7.9, 8.7, 8.1]
+
+for t in tiempos:
+    print(t)
+
+print(min(tiempos))  # ¿quién ganó?</pre>
+      <p>El <code>for</code> recorre carrito por carrito. <code>min()</code> te da el tiempo ganador.</p>
+      <div class="taskgoal"><b>Tu meta hoy:</b> imprimir el tiempo del carrito ganador y EXPLICAR por qué usaste <code>min()</code>. La nota depende de que lo expliques.</div>
+      <div class="iatip">
+        <div class="tt">🧠 TIP IA · CLASE 1</div>
+        <div class="th">Haz que la IA revise TU código, no que lo escriba</div>
+        <p>Escribe tú primero. Luego pega tu intento y pregunta. Así aprendes de tus errores:</p>
+        <div class="mini">"Este es mi código: [pégalo]. ¿Está bien? Si tiene un error, dime dónde está pero NO lo corrijas, para arreglarlo yo."</div>
+      </div>
+      <div class="curio">
+        <div class="ct">🔥 DATO CURIOSO</div>
+        <p>Los equipos de F1 reales analizan <b>más de 300 sensores</b> por carro y generan 1.5 millones de datos por segundo. Todo eso se procesa con... Python. El mismo lenguaje que tú estás aprendiendo hoy con 4 tiempos.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="panel" id="p11">
+    <div class="card">
+      <div class="num">MISIÓN 11°</div>
+      <h3>El reporte oficial del campeonato</h3>
+      <p>Ustedes llevan el reporte. Además de listas, aprenden a guardar datos con etiqueta: piloto Y tiempo juntos.</p>
+      <div><span class="apsh">A ANALIZAR</span><span class="apsh">P PENSAR</span><span class="apsh">S SIMULAR</span><span class="apsh">H HACER</span></div>
+      <pre>ganador = {'piloto': 'Ana', 'tiempo': 7.9}
+
+print(ganador['piloto'])
+print(ganador['tiempo'])</pre>
+      <p>Un <b>diccionario</b> etiqueta cada dato. Así el reporte nunca desalinea quién hizo qué tiempo.</p>
+      <div class="taskgoal"><b>Reto:</b> arma el diccionario del carrito ganador y explica por qué es mejor que una lista suelta para el reporte. ¿Ya tienes tu carrito propio? Trae tus datos reales.</div>
+      <div class="iatip">
+        <div class="tt">🧠 TIP IA · CLASE 1</div>
+        <div class="th">Pídele que compare dos formas de hacerlo</div>
+        <p>Los expertos no preguntan "cómo se hace", preguntan "cuál es mejor y por qué". Sube de nivel:</p>
+        <div class="mini">"¿Cuándo conviene usar una lista y cuándo un diccionario en Python? Dame un ejemplo de cada uno con datos de carreras."</div>
+      </div>
+      <div class="curio">
+        <div class="ct">🔥 DATO CURIOSO</div>
+        <p>Los diccionarios de Python (lo que ves hoy) son la base de <b>casi toda la IA moderna</b>: ChatGPT, los modelos de imágenes, los asistentes de voz... todos guardan sus datos en estructuras clave-valor como la que estás usando para el reporte del campeonato.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- COPILOTO IA (compartido) -->
+  <div class="copilot" id="copilot" style="display:none">
+    <div class="tag">🤖 TU COPILOTO IA</div>
+    <h3>La IA es tu ingeniero. Tú eres el piloto.</h3>
+    <p>Puedes usar la IA en tu celular para esta actividad, pero con una regla de oro: <b>si no puedes explicar lo que te respondió, no lo escribas.</b> Copia este prompt y pégalo en tu IA:</p>
+    <div class="prompt" id="promptText">Soy estudiante de mecatrónica y estoy aprendiendo Python por primera vez. Explícame qué hace este código línea por línea, con palabras sencillas y SIN darme la respuesta final, para que yo la escriba: [pega aquí tu código]</div>
+    <button class="copybtn" onclick="copyPrompt()" id="cbtn">📋 Copiar prompt</button>
+    <div class="rules">
+      <div class="rule"><span class="dot">▸</span><span><b>Audita siempre.</b> La IA se equivoca. Corre el código y compruébalo tú.</span></div>
+      <div class="rule"><span class="dot">▸</span><span><b>Pregunta "por qué", no "dame".</b> Pide que te explique, no que te resuelva.</span></div>
+      <div class="rule"><span class="dot">▸</span><span><b>Si no lo entiendes, no avanzas.</b> Vuelve a preguntar hasta entenderlo.</span></div>
+    </div>
+    <a class="demolink" href="demo-ia.html">🏁 Ver la demo: ¿Copiloto o piloto automático?<small>4 DIAPOSITIVAS · 5 MINUTOS</small></a>
+  </div>
+
+  <!-- GARAGE datos reales -->
+  <div class="garage" id="garage" style="display:none">
+    <h2>▸ Telemetría · tiempos de práctica (s)</h2>
+    <div class="cars">
+      <div class="car"><div class="t">8.4</div><div class="n">Carrito 1</div></div>
+      <div class="car best"><div class="t">7.9</div><div class="n">Carrito 2</div><div class="flag2">🏁 P1</div></div>
+      <div class="car"><div class="t">8.7</div><div class="n">Carrito 3</div></div>
+      <div class="car"><div class="t">8.1</div><div class="n">Carrito 4</div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="lema">"Si no puedes explicar qué hiciste y por qué, no lo aprendiste."</div>
+    Prof. Harold Mafla · Mecatrónica · Colegio San Felipe Neri · 2026
+  </div>
+</footer>
+
+<script>
+  function pick(g){
+    document.querySelectorAll('.gbtn').forEach(b=>b.classList.toggle('active',b.dataset.g===g));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+    document.getElementById('p'+g).classList.add('show');
+    document.getElementById('copilot').style.display='block';
+    document.getElementById('garage').style.display='block';
+    document.getElementById('p'+g).scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  function copyPrompt(){
+    const t=document.getElementById('promptText').innerText;
+    const btn=document.getElementById('cbtn');
+    const done=()=>{btn.textContent='✓ ¡Copiado!';btn.classList.add('done');setTimeout(()=>{btn.textContent='📋 Copiar prompt';btn.classList.remove('done')},1800)};
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(done).catch(fallback)}else{fallback()}
+    function fallback(){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){}document.body.removeChild(ta)}
+  }
+</script>
+</body>
+</html>

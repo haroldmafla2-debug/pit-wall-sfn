@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo: Auditar la IA · Pit Wall</title>
+<style>
+  :root{--carbon:#0a0d12;--carbon2:#12171f;--asfalto:#1b2029;--rojo:#e10600;--rojo2:#ff2b1f;
+    --lima:#c8ff00;--verde:#00e676;--blanco:#f4f6f8;--gris:#8a94a3;--linea:#2a313d;--mono:'Courier New',monospace}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--carbon);color:var(--blanco);font-family:'Segoe UI',system-ui,sans-serif;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    background-image:repeating-linear-gradient(90deg,transparent,transparent 58px,rgba(255,255,255,.012) 58px,rgba(255,255,255,.012) 60px)}
+  .stage{max-width:1100px;width:100%}
+  .slide{display:none;animation:fade .4s}
+  .slide.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .eyebrow{font-family:var(--mono);font-size:clamp(13px,2vw,18px);letter-spacing:4px;color:var(--rojo2);text-transform:uppercase;font-weight:bold;margin-bottom:14px}
+  h1{font-size:clamp(30px,6vw,60px);font-weight:800;line-height:1.05;margin-bottom:20px;letter-spacing:-1px}
+  h1 span{color:var(--rojo2)}
+  .big{font-size:clamp(20px,3vw,30px);color:#d4dae2;line-height:1.5;margin-bottom:16px}
+  .prompt-box{background:#000;border:1px dashed var(--linea);border-radius:10px;padding:22px 26px;
+    font-family:var(--mono);font-size:clamp(15px,2.2vw,22px);color:var(--lima);line-height:1.55;margin:22px 0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:24px}
+  @media(max-width:760px){.cols{grid-template-columns:1fr}}
+  .resp{border-radius:12px;padding:24px;border:2px solid}
+  .resp.bad{background:linear-gradient(135deg,#1a0e0e,#12171f);border-color:var(--rojo)}
+  .resp.good{background:linear-gradient(135deg,#0e1a12,#12171f);border-color:var(--verde)}
+  .resp .lbl{font-family:var(--mono);font-size:16px;letter-spacing:2px;font-weight:bold;margin-bottom:12px;text-transform:uppercase}
+  .resp.bad .lbl{color:var(--rojo2)}.resp.good .lbl{color:var(--verde)}
+  .resp pre{background:#000;border-radius:6px;padding:14px;font-family:var(--mono);font-size:clamp(13px,1.8vw,17px);
+    color:#e8e8e8;line-height:1.5;overflow-x:auto;margin:10px 0;white-space:pre-wrap}
+  .resp p{font-size:clamp(14px,1.9vw,19px);color:#c9d1db;line-height:1.5;margin-bottom:8px}
+  .verdict{margin-top:16px;font-size:clamp(14px,1.9vw,19px);font-weight:bold;display:flex;align-items:center;gap:8px}
+  .resp.bad .verdict{color:var(--rojo2)}.resp.good .verdict{color:var(--verde)}
+  .kw{color:var(--rojo2)}.st{color:var(--lima)}.cm{color:#6b7684}
+  .ask{background:var(--asfalto);border-left:5px solid var(--lima);border-radius:8px;padding:22px 26px;margin-top:24px}
+  .ask .q{font-size:clamp(18px,2.6vw,26px);font-weight:700;color:var(--lima);margin-bottom:8px}
+  .ask .a{font-size:clamp(15px,2vw,20px);color:#c9d1db;line-height:1.5}
+  .senseibox{background:var(--carbon2);border:1px solid var(--linea);border-radius:10px;padding:22px 26px;margin-top:22px}
+  .senseibox .st2{font-family:var(--mono);font-size:15px;color:var(--rojo2);letter-spacing:2px;margin-bottom:8px}
+  .senseibox .sx{font-size:clamp(15px,2vw,20px);color:#d4dae2;line-height:1.5;font-style:italic}
+  .nav{position:fixed;bottom:22px;left:0;right:0;display:flex;justify-content:center;gap:14px;align-items:center}
+  .nav button{background:var(--asfalto);border:1px solid var(--linea);color:var(--blanco);
+    padding:12px 24px;border-radius:8px;font-weight:700;font-size:16px;cursor:pointer;transition:.15s}
+  .nav button:hover{border-color:var(--rojo);background:var(--rojo)}
+  .nav .count{font-family:var(--mono);color:var(--gris);font-size:15px;min-width:56px;text-align:center}
+  .kicker{font-family:var(--mono);font-size:14px;color:var(--gris);letter-spacing:2px;margin-top:26px}
+  .home{position:fixed;top:16px;left:16px;font-family:var(--mono);font-size:12px;letter-spacing:1px;
+    color:var(--gris);text-decoration:none;background:var(--asfalto);border:1px solid var(--linea);
+    padding:8px 14px;border-radius:6px;transition:.15s;z-index:10}
+  .home:hover{border-color:var(--rojo);color:var(--blanco)}
+</style></head>
+<body>
+<a class="home" href="./">◂ PIT WALL</a>
+<div class="stage">
+
+  <!-- 1 -->
+  <div class="slide on">
+    <div class="eyebrow">■ Pit Wall · Demo 5 min</div>
+    <h1>¿La IA es tu <span>copiloto</span><br>o tu piloto automático?</h1>
+    <div class="big">Hoy vamos a hacer una misma pregunta a la IA... y a comparar dos respuestas. Una les sirve. La otra los vuelve dependientes. Aprendan a ver la diferencia.</div>
+    <div class="prompt-box">PROMPT QUE LE DAMOS A LA IA:<br>"Tengo esta lista <span style="color:#fff">tiempos = [8.4, 7.9, 8.7]</span>. Quiero saber cuál es el carrito más rápido."</div>
+    <div class="kicker">▸ Presiona SIGUIENTE para ver las dos respuestas</div>
+  </div>
+
+  <!-- 2 -->
+  <div class="slide">
+    <div class="eyebrow">■ Comparación</div>
+    <h1>Misma pregunta. <span>Dos respuestas.</span></h1>
+    <div class="cols">
+      <div class="resp bad">
+        <div class="lbl">✗ Respuesta que NO sirve</div>
+        <pre>print(min(tiempos))</pre>
+        <p>"Listo, eso te da el más rápido."</p>
+        <div class="verdict">⚠ Te dio el pescado, no te enseñó a pescar</div>
+      </div>
+      <div class="resp good">
+        <div class="lbl">✓ Respuesta que SÍ sirve</div>
+        <pre><span class="cm"># min() busca el valor más pequeño</span>
+<span class="cm"># de la lista. Como el más rápido</span>
+<span class="cm"># es el de MENOR tiempo:</span>
+<span class="kw">print</span>(min(tiempos))</pre>
+        <p>"¿Entiendes por qué el menor tiempo = el más rápido?"</p>
+        <div class="verdict">✓ Te explica el por qué y verifica</div>
+      </div>
+    </div>
+    <div class="kicker">▸ ¿Ven la diferencia? Las dos tienen el mismo código...</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="slide">
+    <div class="eyebrow">■ La clave</div>
+    <h1>El código es igual.<br>Lo que cambia es <span>si aprendiste.</span></h1>
+    <div class="big">Las dos escribieron <span style="color:var(--lima);font-family:var(--mono)">print(min(tiempos))</span>. Pero solo una te deja capaz de resolverlo tú solo la próxima vez.</div>
+    <div class="ask">
+      <div class="q">La pregunta trampa del profe:</div>
+      <div class="a">Voy a señalar a cualquiera y preguntar: <b>"¿por qué usaste min() y no max()?"</b> — Si la IA solo te dio el código, te quedas mudo. Si te explicó, respondes sin dudar.</div>
+    </div>
+    <div class="kicker">▸ Por eso: si no puedes explicarlo, no lo escribas.</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="slide">
+    <div class="eyebrow">■ Tu prompt de piloto</div>
+    <h1>Cómo pedirle a la IA que te <span>enseñe</span></h1>
+    <div class="big">La diferencia está en cómo preguntas. Copia este prompt — es tu llave para que la IA sea copiloto y no piloto automático:</div>
+    <div class="prompt-box">"Soy estudiante y estoy aprendiendo Python por primera vez. Explícame qué hace este código línea por línea, con palabras sencillas y SIN darme la respuesta final, para que yo la escriba: [tu código]"</div>
+    <div class="senseibox">
+      <div class="st2">守破離 · SHU-HA-RI · LA REGLA DEL APRENDIZ</div>
+      <div class="sx">"Primero sigues las reglas y entiendes cada línea (Shu). Solo cuando dominas, puedes romperlas y crear tu estilo (Ha, Ri). El que salta directo a copiar, nunca llega a maestro."</div>
+    </div>
+    <div class="kicker">▸ Yosh! Ahora sí, a la actividad. La IA es tu ingeniero. Tú eres el piloto.</div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <button onclick="mv(-1)">◂ Atrás</button>
+  <span class="count" id="count">1 / 4</span>
+  <button onclick="mv(1)">Siguiente ▸</button>
+</div>
+
+<script>
+  let i=0;const s=document.querySelectorAll('.slide');
+  function show(){s.forEach((x,k)=>x.classList.toggle('on',k===i));document.getElementById('count').textContent=(i+1)+' / '+s.length}
+  function mv(d){i=Math.max(0,Math.min(s.length-1,i+d));show()}
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')mv(1);if(e.key==='ArrowLeft')mv(-1)});
+</script>
+</body></html>
