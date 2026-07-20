@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cultivo Robot · Riego Inteligente · SFN</title>
+<style>
+  :root{
+    --carbon:#0a0d12; --carbon2:#12171f; --asfalto:#1b2029;
+    --verde:#00e676; --verde2:#3dff9a; --tierra:#c98b3a; --agua:#3fa9f5;
+    --lima:#c8ff00; --blanco:#f4f6f8; --gris:#8a94a3; --linea:#2a313d;
+    --rojo:#e10600; --rojo2:#ff2b1f;
+    --mono:'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--carbon); color:var(--blanco);
+    font-family:'Segoe UI',system-ui,sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background-image:repeating-linear-gradient(90deg,transparent,transparent 38px,rgba(255,255,255,.015) 38px,rgba(255,255,255,.015) 40px);
+  }
+  .wrap{max-width:660px;margin:0 auto;padding:0 18px}
+
+  /* HERO */
+  header{
+    padding:38px 0 28px;border-bottom:2px solid var(--verde);
+    background:linear-gradient(180deg,#101a14,var(--carbon));
+    position:relative;overflow:hidden;
+  }
+  .rows{position:absolute;top:0;right:0;width:150px;height:100%;opacity:.07;
+    background:repeating-linear-gradient(75deg,var(--verde) 0 3px,transparent 3px 18px)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--verde2);text-transform:uppercase;font-weight:bold}
+  h1{font-size:34px;font-weight:800;line-height:1.05;margin:8px 0 6px;letter-spacing:-.5px}
+  h1 span{color:var(--verde2)}
+  .sub{color:var(--gris);font-size:15px}
+  .telemetry{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:11px;background:var(--asfalto);border:1px solid var(--linea);
+    padding:6px 10px;border-radius:3px;color:var(--verde2)}
+
+  /* GANCHO */
+  .hook{background:linear-gradient(135deg,#0e1620,#12171f);border:1px solid var(--agua);
+    border-radius:10px;padding:20px;margin:24px 0}
+  .hook .tt{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--agua);font-weight:bold;margin-bottom:8px}
+  .hook .big{font-size:30px;font-weight:800;color:var(--agua);line-height:1.1;margin-bottom:8px}
+  .hook p{font-size:14px;color:#c9d1db}
+
+  /* COMO FUNCIONA */
+  .how{margin:26px 0}
+  .how h2,.picker h2,.plan h2{font-size:13px;letter-spacing:2px;color:var(--gris);text-transform:uppercase;font-family:var(--mono);margin-bottom:14px}
+  .steps{display:grid;gap:10px}
+  .step{background:var(--carbon2);border:1px solid var(--linea);border-radius:8px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
+  .step .n{font-family:var(--mono);font-size:20px;font-weight:bold;color:var(--verde2);flex-shrink:0;line-height:1.2}
+  .step .tx{font-size:14px;color:#c9d1db}
+  .step .tx b{color:var(--blanco)}
+
+  /* SELECTOR */
+  .picker{padding:26px 0 8px}
+  .grades{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .gbtn{background:var(--asfalto);border:1px solid var(--linea);border-radius:6px;
+    padding:16px 8px;text-align:center;cursor:pointer;transition:.15s;color:var(--blanco);
+    font-weight:700;font-size:20px}
+  .gbtn small{display:block;font-size:10px;color:var(--gris);font-weight:400;margin-top:4px;letter-spacing:.5px}
+  .gbtn:hover{border-color:var(--verde)}
+  .gbtn.active{background:var(--verde);border-color:var(--verde2);color:#04140b}
+  .gbtn.active small{color:#04140b;opacity:.75}
+
+  /* PANEL */
+  .panel{display:none;padding:8px 0 30px;animation:fade .3s}
+  .panel.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{background:var(--carbon2);border:1px solid var(--linea);border-radius:8px;padding:20px;margin-top:16px}
+  .card .num{font-family:var(--mono);color:var(--verde2);font-weight:bold;font-size:13px;letter-spacing:1px}
+  .card h3{font-size:20px;margin:4px 0 10px}
+  .card p{color:#c9d1db;font-size:14.5px;margin-bottom:8px}
+
+  /* LEDS */
+  .ledrow{display:flex;gap:10px;margin:14px 0;flex-wrap:wrap}
+  .led{flex:1;min-width:90px;background:#000;border:1px solid var(--linea);border-radius:8px;padding:12px;text-align:center}
+  .led .bulb{width:20px;height:20px;border-radius:50%;margin:0 auto 8px}
+  .led .lb{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--gris)}
+  .led .st{font-size:12px;color:var(--blanco);margin-top:3px;font-weight:600}
+  .b-rojo{background:var(--rojo2);box-shadow:0 0 12px var(--rojo2)}
+  .b-amar{background:#ffd400;box-shadow:0 0 12px #ffd400}
+  .b-verde{background:var(--verde);box-shadow:0 0 12px var(--verde)}
+
+  /* BLOQUES */
+  .blocks{background:#0d1117;border:1px solid var(--linea);border-radius:8px;padding:16px;margin:12px 0}
+  .blk{border-radius:5px;padding:9px 12px;font-size:13px;font-weight:600;margin-bottom:6px;color:#fff;
+    font-family:'Segoe UI',sans-serif;display:inline-block;min-width:100%}
+  .blk-ctrl{background:#f5a623;color:#2b1a00}
+  .blk-in{background:#9b51e0}
+  .blk-out{background:#2d9cdb}
+  .blk-nest{margin-left:22px;border-left:3px solid rgba(255,255,255,.25)}
+  .blk .val{background:rgba(0,0,0,.28);border-radius:10px;padding:1px 9px;font-family:var(--mono);font-size:12px}
+  .hueco{background:repeating-linear-gradient(45deg,#1b2029,#1b2029 6px,#232a35 6px,#232a35 12px);
+    border:2px dashed var(--lima);color:var(--lima);text-align:center;font-family:var(--mono);font-size:12px;
+    letter-spacing:1px;padding:11px;border-radius:5px;margin-bottom:6px;margin-left:22px}
+
+  .taskgoal{background:var(--asfalto);border-radius:6px;padding:13px 15px;margin-top:12px;font-size:13.5px;border-left:3px solid var(--lima)}
+  .taskgoal b{color:var(--lima)}
+  .checks{margin-top:10px;display:grid;gap:7px}
+  .chk{display:flex;gap:9px;font-size:13.5px;color:#c9d1db;align-items:flex-start}
+  .chk .bx{color:var(--verde2);font-weight:bold;flex-shrink:0}
+  .curio{background:var(--asfalto);border-radius:8px;padding:14px 16px;margin-top:12px;border-left:3px solid var(--tierra)}
+  .curio .ct{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--tierra);font-weight:bold;margin-bottom:6px}
+  .curio p{font-size:13.5px;color:#d4dae2;line-height:1.45;margin:0}
+  .curio b{color:var(--lima)}
+  .pregunta{background:linear-gradient(135deg,#1a1206,#12171f);border:1px solid var(--tierra);
+    border-radius:8px;padding:15px 17px;margin-top:12px}
+  .pregunta .pt{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--tierra);font-weight:bold;margin-bottom:7px}
+  .pregunta p{font-size:14px;color:#e8dfd2;margin:0}
+
+  /* PLAN DOCENTE */
+  .plan{margin:30px 0}
+  .tl{display:grid;gap:8px}
+  .tb{display:grid;grid-template-columns:74px 1fr;gap:12px;background:var(--carbon2);
+    border:1px solid var(--linea);border-radius:7px;padding:12px 14px;align-items:start}
+  .tb .mm{font-family:var(--mono);font-size:12px;color:var(--verde2);font-weight:bold;padding-top:1px}
+  .tb .dd{font-size:13.5px;color:#c9d1db}
+  .tb .dd b{color:var(--blanco)}
+
+  .tclink{display:block;margin-top:16px;text-align:center;text-decoration:none;
+    background:var(--verde);color:#04140b;border-radius:8px;padding:15px 16px;
+    font-weight:800;font-size:15px;transition:.15s}
+  .tclink:hover{background:var(--verde2)}
+  .tclink small{display:block;font-family:var(--mono);font-size:10px;opacity:.7;font-weight:600;letter-spacing:1px;margin-top:4px}
+
+  footer{border-top:1px solid var(--linea);padding:24px 0 40px;color:var(--gris);font-size:12px;text-align:center}
+  footer .lema{font-style:italic;color:#aeb6c2;margin-bottom:8px;font-size:13px}
+  footer a{color:var(--verde2);text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="rows"></div>
+  <div class="wrap">
+    <div class="eyebrow">■ Proyecto Agro · Sesión 1</div>
+    <h1>CULTIVO <span>ROBOT</span><br>Riego Inteligente</h1>
+    <p class="sub">Vamos a construir una planta que avisa cuando tiene sed. Sin tierra, sin agua, sin cables de verdad: todo dentro del computador, en Tinkercad.</p>
+    <div class="telemetry">
+      <span class="chip">🌱 Sensor de humedad</span>
+      <span class="chip">🤖 Arduino</span>
+      <span class="chip">⏱ 1 sesión · 50 min</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hook">
+    <div class="tt">💧 ANTES DE EMPEZAR</div>
+    <div class="big">70 de cada 100</div>
+    <p>De toda el agua dulce que usamos los humanos, cerca de <b>70 partes de cada 100 se van a la agricultura</b> — y buena parte se desperdicia regando cuando la tierra ya estaba mojada. Hoy ustedes van a construir el aparato que resuelve eso.</p>
+  </div>
+
+  <div class="how">
+    <h2>▸ ¿Cómo sabe la máquina que hay sed?</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="n">1</div>
+        <div class="tx"><b>El sensor es un tenedor que toca la tierra.</b> Tiene dos puntas de metal. La electricidad intenta pasar de una punta a la otra.</div>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <div class="tx"><b>El agua ayuda a que pase la electricidad.</b> Tierra mojada = la corriente pasa fácil. Tierra seca = le cuesta pasar.</div>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <div class="tx"><b>El Arduino convierte eso en un número.</b> Un número grande significa mojado. Un número pequeño significa seco.</div>
+      </div>
+      <div class="step">
+        <div class="n">4</div>
+        <div class="tx"><b>Ustedes deciden qué hacer con ese número.</b> Esa es la parte que programan hoy — y es la parte que la máquina NO puede decidir sola.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="picker">
+    <h2>▸ Elige tu grado</h2>
+    <div class="grades">
+      <div class="gbtn" data-g="3" onclick="pick('3')">3°<small>SÍ O NO</small></div>
+      <div class="gbtn" data-g="4" onclick="pick('4')">4°<small>SEMÁFORO</small></div>
+      <div class="gbtn" data-g="5" onclick="pick('5')">5°<small>BARRA + DATOS</small></div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="panel" id="p3">
+    <div class="card">
+      <div class="num">MISIÓN 3°</div>
+      <h3>¿La planta tiene sed?</h3>
+      <p>Tu planta solo necesita decir dos cosas: <b>estoy bien</b> o <b>tengo sed</b>. Dos luces, ni una más.</p>
+      <div class="ledrow">
+        <div class="led"><div class="bulb b-verde"></div><div class="lb">LED VERDE</div><div class="st">Estoy bien</div></div>
+        <div class="led"><div class="bulb b-rojo"></div><div class="lb">LED ROJO</div><div class="st">¡Tengo sed!</div></div>
+      </div>
+      <p>El circuito ya viene armado con 5 luces. <b>Tu primer trabajo es quitar las 3 que sobran.</b> Un buen ingeniero también sabe quitar.</p>
+      <div class="blocks">
+        <div class="blk blk-ctrl">si <span class="val">humedad &lt; 400</span> entonces</div>
+        <div class="blk blk-out blk-nest">encender LED <span class="val">rojo</span></div>
+        <div class="hueco">▸ AQUÍ FALTA ALGO — ¿QUÉ?</div>
+        <div class="blk blk-ctrl">si no</div>
+        <div class="hueco">▸ AQUÍ TAMBIÉN</div>
+      </div>
+      <div class="taskgoal"><b>Tu meta hoy:</b> que al mover el control del sensor, la luz cambie de verde a roja sola. Nadie toca nada: la máquina decide.</div>
+      <div class="checks">
+        <div class="chk"><span class="bx">☐</span><span>Quité los 3 LEDs que sobraban</span></div>
+        <div class="chk"><span class="bx">☐</span><span>Llené los dos huecos del programa</span></div>
+        <div class="chk"><span class="bx">☐</span><span>Moví el sensor y la luz cambió sola</span></div>
+      </div>
+      <div class="pregunta">
+        <div class="pt">🎤 TE VOY A PREGUNTAR</div>
+        <p>"¿Por qué el número <b>chiquito</b> significa tierra <b>seca</b>, y no al revés?" — Piénsalo antes de que te toque.</p>
+      </div>
+      <div class="curio">
+        <div class="ct">🌱 DATO CURIOSO</div>
+        <p>Las plantas no tienen boca, pero <b>sí avisan cuando tienen sed</b>: sus hojas se ponen blanditas porque se quedan sin agua adentro. Tu sensor hace lo mismo que hace tu mamá cuando toca la tierra con el dedo.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="panel" id="p4">
+    <div class="card">
+      <div class="num">MISIÓN 4°</div>
+      <h3>El semáforo del cultivo</h3>
+      <p>Dos luces se quedan cortas. En un cultivo real no basta con "bien" o "mal": hay un punto intermedio donde <b>todavía no hay que regar, pero ya toca estar pendiente</b>.</p>
+      <div class="ledrow">
+        <div class="led"><div class="bulb b-rojo"></div><div class="lb">MENOS DE 300</div><div class="st">Regar ya</div></div>
+        <div class="led"><div class="bulb b-amar"></div><div class="lb">300 A 600</div><div class="st">Ojo, va bajando</div></div>
+        <div class="led"><div class="bulb b-verde"></div><div class="lb">MÁS DE 600</div><div class="st">Todo bien</div></div>
+      </div>
+      <p>Fíjate en algo importante: para tres estados necesitas <b>dos números de corte</b>, no tres. Ese detalle es la trampa de hoy.</p>
+      <div class="blocks">
+        <div class="blk blk-ctrl">si <span class="val">humedad &lt; 300</span> entonces</div>
+        <div class="blk blk-out blk-nest">encender LED <span class="val">rojo</span></div>
+        <div class="blk blk-ctrl">si no, si <span class="val">humedad &lt; 600</span> entonces</div>
+        <div class="hueco">▸ ¿QUÉ LUZ VA AQUÍ?</div>
+        <div class="blk blk-ctrl">si no</div>
+        <div class="hueco">▸ ¿Y AQUÍ?</div>
+      </div>
+      <div class="taskgoal"><b>Tu meta hoy:</b> que las tres luces se turnen correctamente al mover el sensor, y que <b>nunca haya dos encendidas al mismo tiempo</b>. Si se prenden dos, algo está mal en tu orden.</div>
+      <div class="checks">
+        <div class="chk"><span class="bx">☐</span><span>Ajusté el circuito a 3 LEDs</span></div>
+        <div class="chk"><span class="bx">☐</span><span>Llené los dos huecos</span></div>
+        <div class="chk"><span class="bx">☐</span><span>Comprobé que nunca se prenden dos a la vez</span></div>
+      </div>
+      <div class="pregunta">
+        <div class="pt">🎤 TE VOY A PREGUNTAR</div>
+        <p>"Si cambio el orden de los bloques y pongo primero el de <b>600</b>, ¿qué se daña?" — Pruébalo de verdad antes de responder.</p>
+      </div>
+      <div class="curio">
+        <div class="ct">🌱 DATO CURIOSO</div>
+        <p>Los invernaderos grandes de flores en la Sabana de Bogotá usan exactamente esta lógica de semáforo, pero con <b>miles de sensores</b> a la vez. Colombia es el segundo exportador de flores del mundo, y esas flores se riegan con decisiones como la que estás programando.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="panel" id="p5">
+    <div class="card">
+      <div class="num">MISIÓN 5°</div>
+      <h3>La barra de telemetría</h3>
+      <p>Ustedes llevan el sistema completo: las <b>5 luces del Starter se quedan</b>, pero no encendidas al azar — funcionan como una barra que muestra cuánta agua hay, igual que la barra de batería del celular.</p>
+      <div class="ledrow">
+        <div class="led"><div class="bulb b-rojo"></div><div class="lb">NIVEL 1</div><div class="st">Crítico</div></div>
+        <div class="led"><div class="bulb b-rojo"></div><div class="lb">NIVEL 2</div><div class="st">Seco</div></div>
+        <div class="led"><div class="bulb b-amar"></div><div class="lb">NIVEL 3</div><div class="st">Medio</div></div>
+        <div class="led"><div class="bulb b-verde"></div><div class="lb">NIVEL 4</div><div class="st">Bien</div></div>
+        <div class="led"><div class="bulb b-verde"></div><div class="lb">NIVEL 5</div><div class="st">Lleno</div></div>
+      </div>
+      <p>Además abren el <b>Monitor en serie</b>: ahí ven el número exacto que está leyendo el sensor, en vivo. Programar a ciegas es adivinar; con el monitor, ustedes miden.</p>
+      <div class="blocks">
+        <div class="blk blk-in">fijar <span class="val">humedad</span> a leer pin analógico <span class="val">A0</span></div>
+        <div class="blk blk-out">imprimir en monitor serie <span class="val">humedad</span></div>
+        <div class="blk blk-ctrl">si <span class="val">humedad &gt; 200</span> entonces</div>
+        <div class="blk blk-out blk-nest">encender LED <span class="val">1</span></div>
+        <div class="hueco">▸ REPITE EL PATRÓN PARA LOS LEDS 2, 3, 4 Y 5</div>
+        <div class="hueco">▸ ¿QUÉ NÚMERO DE CORTE LE PONES A CADA UNO?</div>
+      </div>
+      <div class="taskgoal"><b>Tu reto:</b> que la barra suba y baje suave, sin saltos raros. Y que puedas <b>decir en voz alta qué número escogiste para cada LED y por qué</b>. Los números no se copian del compañero: se justifican.</div>
+      <div class="checks">
+        <div class="chk"><span class="bx">☐</span><span>Los 5 LEDs responden en orden</span></div>
+        <div class="chk"><span class="bx">☐</span><span>Abrí el monitor serie y vi los números reales</span></div>
+        <div class="chk"><span class="bx">☐</span><span>Puedo justificar cada número de corte</span></div>
+      </div>
+      <div class="pregunta">
+        <div class="pt">🎤 TE VOY A PREGUNTAR</div>
+        <p>"Tu sensor marca <b>0</b> todo el tiempo. ¿Está dañado, está muy seco, o está mal conectado? <b>¿Cómo lo averiguas?</b>" — Esa es la pregunta de un ingeniero de verdad.</p>
+      </div>
+      <div class="curio">
+        <div class="ct">🌱 DATO CURIOSO</div>
+        <p>Un cultivo con riego por sensores puede ahorrar <b>entre 30 y 50 por ciento del agua</b> comparado con regar por horario fijo. No es magia: es simplemente no regar cuando ya está mojado. Esa decisión de una línea es la que estás programando.</p>
+      </div>
+    </div>
+  </div>
+
+  <a class="tclink" href="https://www.tinkercad.com/things/4etVz5sF7kY" target="_blank" rel="noopener">🔧 Abrir el circuito en Tinkercad<small>ARDUINO + SENSOR DE HUMEDAD · YA CABLEADO</small></a>
+
+  <div class="plan">
+    <h2>▸ Plan de la sesión · 50 minutos</h2>
+    <div class="tl">
+      <div class="tb"><div class="mm">0 – 6</div><div class="dd"><b>El gancho.</b> Pregunta abierta: "¿cómo sabe un campesino cuándo regar?" Escuchas 3 respuestas. Luego el dato del 70%.</div></div>
+      <div class="tb"><div class="mm">6 – 14</div><div class="dd"><b>El sensor, sin computador.</b> Explicas los 4 pasos de arriba. Si puedes, lleva tierra seca y tierra mojada en dos vasos: que la toquen.</div></div>
+      <div class="tb"><div class="mm">14 – 22</div><div class="dd"><b>Demo proyectada.</b> Abres Tinkercad, mueves el control del sensor, muestran que la luz cambia. <b>No expliques el código todavía</b> — que primero vean el efecto.</div></div>
+      <div class="tb"><div class="mm">22 – 42</div><div class="dd"><b>Ellos trabajan.</b> Cada grado con su misión. Tú caminas y preguntas "¿por qué ese número?" — no corriges, preguntas.</div></div>
+      <div class="tb"><div class="mm">42 – 50</div><div class="dd"><b>Cierre.</b> Dos o tres pasan y explican su decisión en voz alta. La nota es por la explicación, no por si funcionó.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="lema">"Si no puedes explicar qué hiciste y por qué, no lo aprendiste."</div>
+    Prof. Harold Mafla · Colegio San Felipe Neri · 2026<br>
+    <a href="./">◂ Volver a Pit Wall</a>
+  </div>
+</footer>
+
+<script>
+  function pick(g){
+    document.querySelectorAll('.gbtn').forEach(b=>b.classList.toggle('active',b.dataset.g===g));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+    document.getElementById('p'+g).classList.add('show');
+    document.getElementById('p'+g).scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+</script>
+</body>
+</html>
